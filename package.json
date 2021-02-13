@@ -11,6 +11,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/w3c-web-hid": "^1.0.0",
+    "immer": "^8.0.1",
     "prettier": "^2.2.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -23,7 +24,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "format": "yarn prettier --write src/**.ts src/**.tsx",
+    "format": "yarn prettier --write src",
     "lint": "eslint --fix src/**.tsx"
   },
   "eslintConfig": {
