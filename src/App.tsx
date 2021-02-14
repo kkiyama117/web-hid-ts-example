@@ -11,6 +11,7 @@ import {
 } from "./hid_nintendo_switch/constants/filters";
 import { delay } from "./utils";
 import { sendReport } from "./hid_common";
+import { dataViewToArray } from "./hid_nintendo_switch/utils";
 
 const HID_NINTENDO_SWITCH_FILTERS: HIDDeviceFilter[] = [
   HID_NINTENDO_SWITCH_FILTER_JOYCON_L,
@@ -20,17 +21,8 @@ const HID_NINTENDO_SWITCH_FILTERS: HIDDeviceFilter[] = [
 
 // Report
 const handleReceiveReport = (e: HIDInputReportEvent): void => {
-  if (e.reportId === 0x30) {
-    console.log(
-      e.device.productName +
-        ": got input report " +
-        "0x" +
-        e.reportId.toString(16)
-    );
-    console.log(JSON.stringify(e));
-    if (e.data){
-      console.error(JSON.stringify(e.data.getUint8(0)));
-    }
+  if (e.reportId === 0x3f) {
+    console.log(dataViewToArray(e.data));
   } else {
     console.error(
       e.device.productName +
@@ -38,15 +30,14 @@ const handleReceiveReport = (e: HIDInputReportEvent): void => {
         "0x" +
         e.reportId.toString(16)
     );
-    console.error(JSON.stringify(e));
-    console.error(JSON.stringify(e.data.getUint8(0)));
+    console.error(dataViewToArray(e.data));
   }
 };
 
 const handleSendDataBase = async (
   device: HIDDevice,
-  packetNum:number,
-  rumbles= DEFAULT_RUMBLE_DATA,
+  packetNum: number,
+  rumbles = DEFAULT_RUMBLE_DATA,
   subcommand: number,
   subcommandArgs: number[]
 ) => {
@@ -63,14 +54,20 @@ const handleSendData = async (
 ): Promise<number> => {
   let _packetId = packetNum;
   // enable sensor
-  await handleSendDataBase(device,_packetId,DEFAULT_RUMBLE_DATA,0x40,[0x01]);
+  await handleSendDataBase(device, _packetId, DEFAULT_RUMBLE_DATA, 0x40, [
+    0x01,
+  ]);
   _packetId++;
   // Enable vibration
-  await handleSendDataBase(device,_packetId,DEFAULT_RUMBLE_DATA,0x48,[0x01]);
+  await handleSendDataBase(device, _packetId, DEFAULT_RUMBLE_DATA, 0x48, [
+    0x01,
+  ]);
   _packetId++;
-  await handleSendDataBase(device,_packetId,DEFAULT_RUMBLE_DATA,0x03,[0x30]);
+  await handleSendDataBase(device, _packetId, DEFAULT_RUMBLE_DATA, 0x03, [
+    0x30,
+  ]);
   _packetId++;
-  await handleSendDataBase(device,_packetId,DEFAULT_RUMBLE_DATA,0x02,[]);
+  await handleSendDataBase(device, _packetId, DEFAULT_RUMBLE_DATA, 0x02, []);
   _packetId++;
   return _packetId;
 };
@@ -83,11 +80,10 @@ const WebHID = (props: WebHIDProps) => {
 
   // OPEN ====================================================================
   const connectDevice = async (event: any) => {
-    await navigator.hid.requestDevice({
+    const devices: HIDDevice[] = await navigator.hid.requestDevice({
       filters: HID_NINTENDO_SWITCH_FILTERS,
     });
     await delay(500);
-    const devices: HIDDevice[] | undefined = await navigator.hid.getDevices();
     console.log(devices);
     if (devices) {
       const _device = devices[0];
