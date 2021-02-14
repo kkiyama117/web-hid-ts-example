@@ -1,8 +1,21 @@
 // RECEIVE =================================================================
+// TODO(kkiyama117): Utils for input data
 
 // SEND ======================================================================
 export const sendReport = async (
   device: HIDDevice,
   reportId: number,
-  query: ArrayBuffer | ArrayBufferView
-): Promise<void> => await device.sendReport(reportId, query);
+  sendData: ArrayBuffer | ArrayBufferView,
+  filter?: (
+    reportId: number,
+    sendData: ArrayBuffer | ArrayBufferView
+  ) => boolean
+): Promise<void> => {
+  if (filter) {
+    if (filter(reportId, sendData)) {
+      await device.sendReport(reportId, sendData);
+    }
+  } else {
+    await device.sendReport(reportId, sendData);
+  }
+};
